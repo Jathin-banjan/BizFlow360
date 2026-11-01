@@ -1,0 +1,13 @@
+{
+  "name": "bizflow360-root",
+  "version": "1.0.0",
+  "private": true,
+  "description": "BizFlow 360 Monorepo",
+  "scripts": {
+    "build": "npm run build --prefix backend",
+    "start": "npm start --prefix backend",
+    "start:prod": "npm run start:tsx --prefix backend",
+    "install:backend": "npm install --prefix backend",
+    "install:frontend": "npm install --prefix frontend"
+  }
+}

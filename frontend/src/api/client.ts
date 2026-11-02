@@ -1,4 +1,14 @@
-const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || '/api/v1';
+function getApiBaseUrl(): string {
+  const envUrl = (import.meta as any).env?.VITE_API_BASE_URL?.trim();
+  if (!envUrl) return '/api/v1';
+  let cleanUrl = envUrl.endsWith('/') ? envUrl.slice(0, -1) : envUrl;
+  if (!cleanUrl.endsWith('/api/v1') && !cleanUrl.endsWith('/api')) {
+    cleanUrl = `${cleanUrl}/api/v1`;
+  }
+  return cleanUrl;
+}
+
+const API_BASE_URL = getApiBaseUrl();
 
 export class ApiError extends Error {
   public code: string;
@@ -44,14 +54,24 @@ export async function apiClient<T>(endpoint: string, options: RequestOptions = {
     defaultHeaders['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(url, {
-    ...restOptions,
-    headers: {
-      ...defaultHeaders,
-      ...(headers as Record<string, string>),
-    },
-    credentials: 'include', // Support HTTP-only cookies
-  });
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      ...restOptions,
+      headers: {
+        ...defaultHeaders,
+        ...(headers as Record<string, string>),
+      },
+      credentials: 'include',
+    });
+  } catch (netErr: any) {
+    console.error(`Network fetch failed for [${options.method || 'GET'}] ${url}:`, netErr);
+    throw new ApiError(
+      `Unable to reach backend at ${API_BASE_URL}. Please ensure your Vercel VITE_API_BASE_URL is saved and redeployed.`,
+      'NETWORK_ERROR',
+      0
+    );
+  }
 
   // Handle CSV/Blob downloads
   const contentType = response.headers.get('content-type');

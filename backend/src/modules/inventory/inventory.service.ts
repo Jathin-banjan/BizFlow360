@@ -2,6 +2,7 @@ import { Product } from '../products/product.model.js';
 import { InventoryMovement, IInventoryMovement } from './inventoryMovement.model.js';
 import { NotFoundError, BadRequestError } from '../../common/errors.js';
 import { calculateInventoryValuation } from '../../common/calculations.js';
+import { broadcastEvent } from '../../config/socket.js';
 import { Types } from 'mongoose';
 
 export class InventoryService {
@@ -119,6 +120,15 @@ export class InventoryService {
       performedBy: userId ? new Types.ObjectId(userId) : undefined,
       performedByName: userName || 'Admin',
     });
+
+    // Broadcast real-time WebSocket update
+    broadcastEvent('stock:updated', {
+      productId: product._id,
+      sku: product.sku,
+      newStock: product.currentStock,
+      movementType: 'ADJUSTMENT',
+    });
+    broadcastEvent('kpi:updated', { type: 'STOCK_ADJUSTMENT' });
 
     return { product, movement };
   }

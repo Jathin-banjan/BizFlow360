@@ -1,11 +1,13 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { LogOut, User as UserIcon, Shield, Database } from 'lucide-react';
+import { LogOut, User as UserIcon, Shield, Database, Radio } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useSocket } from '../../context/SocketContext';
 import { Badge } from '../ui/Badge';
 
 export const Header: React.FC = () => {
   const { user, logout } = useAuth();
+  const { isConnected: isWsConnected } = useSocket();
   const location = useLocation();
 
   // Generate breadcrumb title from path
@@ -47,11 +49,18 @@ export const Header: React.FC = () => {
 
       {/* Right Controls */}
       <div className="flex items-center gap-3">
-        {/* Live DB Indicator */}
+        {/* Live DB & WebSocket Indicator */}
         <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium">
           <Database className="w-3.5 h-3.5 text-emerald-600" />
           <span>MongoDB Live</span>
         </div>
+
+        {isWsConnected && (
+          <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-primary text-xs font-medium">
+            <Radio className="w-3.5 h-3.5 text-primary animate-pulse" />
+            <span>WebSockets Active</span>
+          </div>
+        )}
 
         {/* User Role Badge */}
         {user && (

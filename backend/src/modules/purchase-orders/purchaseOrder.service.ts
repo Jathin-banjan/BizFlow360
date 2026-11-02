@@ -4,6 +4,7 @@ import { Supplier } from '../suppliers/supplier.model.js';
 import { InventoryMovement } from '../inventory/inventoryMovement.model.js';
 import { NotFoundError, BadRequestError } from '../../common/errors.js';
 import { PurchaseOrderStatus } from '../../common/types.js';
+import { broadcastEvent } from '../../config/socket.js';
 import { Types } from 'mongoose';
 
 export class PurchaseOrderService {
@@ -179,6 +180,10 @@ export class PurchaseOrderService {
 
     po.status = newStatus;
     await po.save();
+
+    broadcastEvent('po:status', { poId: po._id, poNumber: po.poNumber, status: po.status });
+    broadcastEvent('kpi:updated', { type: 'PO_STATUS_CHANGED' });
+
     return po;
   }
 
@@ -273,6 +278,10 @@ export class PurchaseOrderService {
     po.receivedBy = userId ? new Types.ObjectId(userId) : undefined;
 
     await po.save();
+
+    broadcastEvent('stock:updated', { poNumber: po.poNumber, status: po.status });
+    broadcastEvent('kpi:updated', { type: 'STOCK_RECEIVED' });
+
     return po;
   }
 }

@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
+import { SocketProvider } from './context/SocketContext';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import { AppShell } from './components/layout/AppShell';
 
@@ -23,7 +24,8 @@ export const App: React.FC = () => {
     <BrowserRouter>
       <ToastProvider>
         <AuthProvider>
-          <Routes>
+          <SocketProvider>
+            <Routes>
             <Route path="/login" element={<LoginPage />} />
 
             {/* Protected Application Routes */}
@@ -49,6 +51,7 @@ export const App: React.FC = () => {
             {/* Catch-all redirect */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          </SocketProvider>
         </AuthProvider>
       </ToastProvider>
     </BrowserRouter>

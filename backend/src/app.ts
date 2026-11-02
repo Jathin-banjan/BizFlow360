@@ -26,7 +26,10 @@ const app = express();
 app.use(helmet());
 app.use(
   cors({
-    origin: config.corsOrigin,
+    origin: (origin, callback) => {
+      // Allow any requesting origin dynamically so credentials: true is accepted by browsers
+      callback(null, origin || true);
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],

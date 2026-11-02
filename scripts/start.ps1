@@ -14,15 +14,18 @@ if ($port5173) {
     Write-Host "WARNING: Port 5173 is already in use by process ID $($port5173[0].OwningProcess)." -ForegroundColor Yellow
 }
 
+$rootDir = (Resolve-Path "$PSScriptRoot\..").Path
+
 # 2. Check MongoDB Daemon / Data Directory
 $port27017 = Get-NetTCPConnection -LocalPort 27017 -ErrorAction SilentlyContinue
 if (-not $port27017) {
     Write-Host "MongoDB is not running on port 27017. Attempting to start local mongod..." -ForegroundColor Yellow
-    if (-not (Test-Path "data\db")) {
-        New-Item -ItemType Directory -Path "data\db" -Force | Out-Null
+    $dbPath = Join-Path $rootDir "data\db"
+    if (-not (Test-Path $dbPath)) {
+        New-Item -ItemType Directory -Path $dbPath -Force | Out-Null
     }
     if (Get-Command mongod -ErrorAction SilentlyContinue) {
-        Start-Process mongod -ArgumentList "--dbpath `".\data\db`" --port 27017 --bind_ip 127.0.0.1" -WindowStyle Minimized
+        Start-Process mongod -ArgumentList "--dbpath `"$dbPath`" --port 27017 --bind_ip 127.0.0.1" -WindowStyle Minimized
         Start-Sleep -Seconds 3
         Write-Host "Local MongoDB started on 127.0.0.1:27017." -ForegroundColor Green
     } else {
@@ -34,11 +37,11 @@ if (-not $port27017) {
 
 # 3. Start Backend in new process
 Write-Host "Starting Express.js Backend API on http://localhost:5000..." -ForegroundColor Cyan
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd backend; npm run dev"
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "Set-Location '$rootDir\backend'; npm run dev"
 
 # 4. Start Frontend in new process
 Write-Host "Starting React / Vite Frontend on http://localhost:5173..." -ForegroundColor Cyan
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd frontend; npm run dev"
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "Set-Location '$rootDir\frontend'; npm run dev"
 
 Start-Sleep -Seconds 4
 

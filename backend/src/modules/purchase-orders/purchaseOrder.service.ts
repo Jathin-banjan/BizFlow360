@@ -171,7 +171,7 @@ export class PurchaseOrderService {
       }
       po.approvedBy = userId ? new Types.ObjectId(userId) : undefined;
     } else if (newStatus === 'CANCELLED') {
-      if (currentStatus === 'PARTIALLY_RECEIVED' || currentStatus === 'RECEIVED') {
+      if ((currentStatus as string) === 'PARTIALLY_RECEIVED' || (currentStatus as string) === 'RECEIVED') {
         throw new BadRequestError(`Cannot cancel an order that already has stock receipts recorded`);
       }
     } else {

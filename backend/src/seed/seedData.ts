@@ -15,10 +15,12 @@ import { Requirement } from '../modules/requirements/requirement.model.js';
 import { BusinessInsight } from '../modules/analytics/businessInsight.model.js';
 import { AuditEvent } from '../modules/audit/auditEvent.model.js';
 
-export async function seedDatabase() {
+export async function seedDatabase(shouldConnect: boolean = true) {
   try {
-    logger.info('Connecting to MongoDB for deterministic seed generation...');
-    await mongoose.connect(config.mongoUri);
+    if (shouldConnect) {
+      logger.info('Connecting to MongoDB for deterministic seed generation...');
+      await mongoose.connect(config.mongoUri);
+    }
 
     logger.info('Cleaning existing test collections...');
     await Promise.all([
@@ -738,10 +740,15 @@ export async function seedDatabase() {
     logger.info('  Manager: manager@bizflow360.com / Manager@12345');
     logger.info('  Analyst: analyst@bizflow360.com / Analyst@12345');
 
-    await mongoose.disconnect();
+    if (shouldConnect) {
+      await mongoose.disconnect();
+    }
   } catch (err: any) {
     logger.error('Error during database seed execution', { error: err.message, stack: err.stack });
-    process.exit(1);
+    if (shouldConnect) {
+      process.exit(1);
+    }
+    throw err;
   }
 }
 

@@ -1,26 +1,19 @@
 services:
-  # BizFlow 360 Express.js Backend API
+  # BizFlow 360 Express.js + Socket.IO Backend Server (MediFlow / Arogya Blueprint)
   - type: web
     name: bizflow360-backend
-    runtime: node
+    env: node
     plan: free
-    region: oregon
-    rootDir: backend
-    buildCommand: npm install && npm run build
-    startCommand: npm start
+    region: singapore
+    buildCommand: cd backend && npm install && npm run build
+    startCommand: cd backend && npm start
     healthCheckPath: /api/v1/health
     envVars:
+      - key: PORT
+        value: 5000
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 10000
-      - key: MONGODB_URI
-        sync: false # Set to your MongoDB Atlas connection string in Render Dashboard
       - key: JWT_SECRET
-        generateValue: true # Render automatically generates a secure random secret
-      - key: JWT_EXPIRES_IN
-        value: 7d
+        value: bizflow360_super_secret_jwt_key_2026
       - key: CORS_ORIGIN
-        sync: false # Set to your Vercel frontend URL, e.g. https://bizflow360.vercel.app
-      - key: LOG_LEVEL
-        value: info
+        value: "*"

@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -37,7 +37,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Health Check Endpoint
-app.get('/api/v1/health', (req, res) => {
+app.get('/api/v1/health', (req: Request, res: Response) => {
   const isDbConnected = mongoose.connection.readyState === 1;
   return res.status(200).json({
     success: true,
@@ -67,7 +67,7 @@ app.use('/api/v1/exports', exportRoutes);
 app.use('/api/v1/audit', auditRoutes);
 
 // Unmatched Route Handler
-app.use('*', (req, res, next) => {
+app.use('*', (req: Request, res: Response, next: NextFunction) => {
   next(new NotFoundError(`Resource not found at ${req.originalUrl}`));
 });
 
